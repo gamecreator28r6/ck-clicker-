@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Cookie Clicker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f9f3e4;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      transition: background-color 1s ease;
+    }
+    .main {
+      text-align: center;
+      margin-right: 50px;
+      position: relative;
+    }
+    .cookie {
+      width: 200px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .cookie:active {
+      transform: scale(0.95);
+    }
+    #counter {
+      font-size: 3em;
+      font-weight: bold;
+      color: #8b4513;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px #d2a679;
+    }
+    .store {
+      background-color: #fffbe6;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease;
+    }
+    .upgrades {
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+    }
+    .floating-text {
+      position: absolute;
+      font-size: 1em;
+      color: #7b3f00;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
+    .purchase-flash {
+      animation: flashGreen 0.3s ease;
+    }
+    @keyframes flashGreen {
+      0% { background-color: #d4edda; }
+      100% { background-color: #fffbe6; }
+    }
+  </style>
+</head>
+<body id="body">
+  <div class="main">
+    <h1>Cookie Clicker Mini</h1>
+    <div id="counter">Galletas: 0</div>
+    <img src="https://orteil.dashnet.org/cookieclicker/img/perfectCookie.png" class="cookie" id="cookie">
+  </div>
+  <div class="store" id="store">
+    <div class="upgrades">
+      <h2>Mejoras</h2>
+      <button onclick="buyClickUpgrade()">Multiplicador de Click x2 (Coste: <span id="clickUpgradeCost">100</span>)</button>
+    </div>
+    <h2>Tienda</h2>
+    <button onclick="buyCursor()">Comprar Cursor (Coste: <span id="cursorCost">10</span>)</button>
+    <div>Cursors: <span id="cursorCount">0</span></div>
+
+    <button onclick="buyGrandma()">Comprar Abuela (Coste: <span id="grandmaCost">100</span>)</button>
+    <div>Abuelas: <span id="grandmaCount">0</span></div>
+
+    <button onclick="buyFarm()">Comprar Granja (Coste: <span id="farmCost">500</span>)</button>
+    <div>Granjas: <span id="farmCount">0</span></div>
+
+    <button onclick="buyFactory()">Comprar Fábrica (Coste: <span id="factoryCost">2500</span>)</button>
+    <div>Fábricas: <span id="factoryCount">0</span></div>
+  </div>
+
+  <script>
+    let cookies = 0;
+    let cursors = 0;
+    let cursorCost = 10;
+    let grandmaCount = 0;
+    let grandmaCost = 100;
+    let farmCount = 0;
+    let farmCost = 500;
+    let factoryCount = 0;
+    let factoryCost = 2500;
+    let clickMultiplier = 1;
+    let clickUpgradeCost = 100;
+
+    const counterEl = document.getElementById("counter");
+    const cookieEl = document.getElementById("cookie");
+    const mainEl = document.querySelector(".main");
+    const bodyEl = document.getElementById("body");
+    const storeEl = document.getElementById("store");
+
+    cookieEl.onclick = (e) => {
+      cookies += 1 * clickMultiplier;
+      updateCounter();
+      showFloatingText("+" + (1 * clickMultiplier), e.clientX, e.clientY);
+    };
+
+    function showFloatingText(text, x, y) {
+      const span = document.createElement("span");
+      span.className = "floating-text";
+      span.textContent = text;
+      span.style.left = `${x - mainEl.getBoundingClientRect().left - 20}px`;
+      span.style.top = `${y - mainEl.getBoundingClientRect().top - 20}px`;
+      mainEl.appendChild(span);
+      setTimeout(() => span.remove(), 1000);
+    }
+
+    function updateCounter() {
+      counterEl.textContent = `Galletas: ${cookies.toFixed(1)}`;
+      updateBackground();
+    }
+
+    function updateBackground() {
+      if (cookies >= 10000) {
+        bodyEl.style.backgroundColor = "#3c2f2f";
+      } else if (cookies >= 5000) {
+        bodyEl.style.backgroundColor = "#ffd700";
+      } else if (cookies >= 1000) {
+        bodyEl.style.backgroundColor = "#fddbb0";
+      } else {
+        bodyEl.style.backgroundColor = "#f9f3e4";
+      }
+    }
+
+    function flashStore() {
+      storeEl.classList.add("purchase-flash");
+      setTimeout(() => storeEl.classList.remove("purchase-flash"), 300);
+    }
+
+    function buyClickUpgrade() {
+      if (cookies >= clickUpgradeCost) {
+        cookies -= clickUpgradeCost;
+        clickMultiplier *= 2;
+        clickUpgradeCost = Math.floor(clickUpgradeCost * 2);
+        document.getElementById("clickUpgradeCost").textContent = clickUpgradeCost;
+        updateCounter();
+        flashStore();
+      }
+    }
+
+    function buyCursor() {
+      if (cookies >= cursorCost) {
+        cookies -= cursorCost;
+        cursors++;
+        cursorCost = Math.floor(cursorCost * 1.15);
+        document.getElementById("cursorCount").textContent = cursors;
+        document.getElementById("cursorCost").textContent = cursorCost;
+        updateCounter();
+        flashStore();
+      }
+    }
+
+    function buyGrandma() {
+      if (cookies >= grandmaCost) {
+        cookies -= grandmaCost;
+        grandmaCount++;
+        grandmaCost = Math.floor(grandmaCost * 1.15);
+        document.getElementById("grandmaCount").textContent = grandmaCount;
+        document.getElementById("grandmaCost").textContent = grandmaCost;
+        updateCounter();
+        flashStore();
+      }
+    }
+
+    function buyFarm() {
+      if (cookies >= farmCost) {
+        cookies -= farmCost;
+        farmCount++;
+        farmCost = Math.floor(farmCost * 1.15);
+        document.getElementById("farmCount").textContent = farmCount;
+        document.getElementById("farmCost").textContent = farmCost;
+        updateCounter();
+        flashStore();
+      }
+    }
+
+    function buyFactory() {
+      if (cookies >= factoryCost) {
+        cookies -= factoryCost;
+        factoryCount++;
+        factoryCost = Math.floor(factoryCost * 1.15);
+        document.getElementById("factoryCount").textContent = factoryCount;
+        document.getElementById("factoryCost").textContent = factoryCost;
+        updateCounter();
+        flashStore();
+      }
+    }
+
+    setInterval(() => {
+      cookies += cursors * 0.1;
+      cookies += grandmaCount * 1;
+      cookies += farmCount * 5;
+      cookies += factoryCount * 10;
+      updateCounter();
+    }, 1000);
+  </script>
+</body>
+</html>
